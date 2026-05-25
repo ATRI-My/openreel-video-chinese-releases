@@ -1,0 +1,25 @@
+appId: com.openreel.video
+productName: OpenReel Video
+artifactName: OpenReel-Video-Setup-${version}.${ext}
+copyright: MIT License
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - electron/**/*
+  - apps/web/dist/**/*
+  - "!**/node_modules/.cache/**"
+  - "!**/.git/**"
+
+afterPack: ./after-pack.js
+
+extraMetadata:
+  main: electron/main.js
+
+win:
+  icon: assets/icon.ico
+  target:
+    - target: portable
+      arch: [x64]
