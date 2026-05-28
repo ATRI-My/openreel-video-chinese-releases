@@ -2,6 +2,14 @@
 
 一键构建 OpenReel Video 中文版 Electron 桌面应用。
 
+## 修复说明
+
+修复了 Electron 打包后视频文件无法导入的问题。
+根因：FFmpeg.wasm 从 `unpkg.com` CDN 加载核心文件，被 Cross-Origin-Embedder-Policy 拦截。
+
+解决方案：构建时自动将 FFmpeg 核心文件复制到本地 `dist/` 目录，
+并在 Electron 主进程中通过请求拦截重定向到本地路径，无需修改源码。
+
 ## 用法
 
 双击 `build.bat`，自动完成：
@@ -9,7 +17,8 @@
 2. 复制 Electron 打包配置
 3. 安装依赖
 4. 构建 Web 应用
-5. 打包为 Windows 单文件 exe
+5. 复制 FFmpeg 核心文件到本地
+6. 打包为 Windows 单文件 exe
 
 产物见 `source/release/OpenReel-Video-Setup-x.x.x.exe`
 

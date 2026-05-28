@@ -88,7 +88,7 @@ async function checkForUpdates(currentVersion) {
       type: 'info',
       title: '发现新版本',
       message: `发现新版 OpenReel Video v${latestVersion}`,
-      detail: `当前版本：v${currentVersion}\n\n请下载最新源码，运行 update-and-build.bat 打包新版。`,
+      detail: `当前版本：v${currentVersion}\n\n请下载最新源码，运行 build.bat 打包新版。`,
       buttons: ['前往下载页面', '稍后提醒', '跳过此版本'],
       defaultId: 0,
       cancelId: 1,
@@ -200,6 +200,38 @@ function setupProtocol() {
   });
 }
 
+function setupRequestRedirects() {
+  session.defaultSession.webRequest.onBeforeRequest(
+    {
+      urls: ['https://unpkg.com/@ffmpeg/core*@*/dist/*'],
+    },
+    (details, callback) => {
+      const url = new URL(details.url);
+      const match = url.pathname.match(/^\/@ffmpeg\/(core(?:-mt)?)@[\d.]+\/dist\/esm\/(.*)$/);
+      if (match) {
+        callback({ redirectURL: `openreel://app/ffmpeg/${match[1]}/${match[2]}` });
+      } else {
+        callback({ cancel: true });
+      }
+    },
+  );
+
+  session.defaultSession.webRequest.onBeforeRequest(
+    {
+      urls: ['https://mediashares.openreel.video/ffmpeg-vidstab/*'],
+    },
+    (details, callback) => {
+      const url = new URL(details.url);
+      const match = url.pathname.match(/^\/ffmpeg-vidstab\/(.*)$/);
+      if (match) {
+        callback({ redirectURL: `openreel://app/vidstab/${match[1]}` });
+      } else {
+        callback({ cancel: true });
+      }
+    },
+  );
+}
+
 function setupMenu() {
   const template = [
     {
@@ -254,6 +286,7 @@ protocol.registerSchemesAsPrivileged([
     scheme: 'openreel',
     privileges: {
       standard: true,
+      secure: true,
       supportFetchAPI: true,
       corsEnabled: true,
       stream: true,
@@ -264,6 +297,7 @@ protocol.registerSchemesAsPrivileged([
 
 app.whenReady().then(async () => {
   setupProtocol();
+  setupRequestRedirects();
   setupMenu();
   createWindow();
 
